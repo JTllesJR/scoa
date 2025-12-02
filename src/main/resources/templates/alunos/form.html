@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastrar Aluno - SCOA</title>
+
+    <!-- Bootstrap -->
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+    >
+</head>
+
+<body class="bg-light d-flex flex-column min-vh-100">
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}">SCOA</a>
+    </div>
+</nav>
+
+<!-- CONTEÚDO PRINCIPAL -->
+<div class="container mt-5">
+
+    <h2 class="mb-4 text-center">Cadastrar Novo Aluno</h2>
+
+    <div class="card shadow-sm mx-auto" style="max-width: 700px;">
+        <div class="card-body">
+
+            <!-- FORMULÁRIO -->
+            <form th:action="@{/alunos}" th:object="${aluno}" method="post">
+
+                <div class="mb-3">
+                    <label class="form-label">Nome</label>
+                    <input type="text" th:field="*{nome}" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">CPF</label>
+                    <input type="text" th:field="*{cpf}" class="form-control" placeholder="111.222.333-44" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" th:field="*{email}" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Endereço</label>
+                    <input type="text" th:field="*{endereco}" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Telefone</label>
+                    <input type="text" th:field="*{telefone}" class="form-control" placeholder="(21) 99999-0000">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Situação Acadêmica</label>
+                    <select th:field="*{situacaoAcademica}" class="form-select">
+                        <option value="ATIVO">ATIVO</option>
+                        <option value="TRANCADO">TRANCADO</option>
+                        <option value="FORMADO">FORMADO</option>
+                        <option value="DESLIGADO">DESLIGADO</option>
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a th:href="@{/alunos}" class="btn btn-secondary">Voltar</a>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- RODAPÉ -->
+<footer class="mt-auto py-3 bg-dark text-light">
+    <div class="container text-center">
+        <small>SCOA © <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}"></span></small>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
