@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastrar Turma - SCOA</title>
+
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+    >
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}">SCOA</a>
+    </div>
+</nav>
+
+<div class="container mt-5">
+
+    <h2 class="mb-4 text-center">Cadastrar Nova Turma</h2>
+
+    <div class="card shadow-sm mx-auto" style="max-width: 800px;">
+        <div class="card-body">
+
+            <form th:action="@{/turmas}" th:object="${turma}" method="post">
+
+                <div class="row">
+                    <!-- Disciplina -->
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label">Disciplina</label>
+                        <select class="form-select" name="idDisciplina" required>
+                            <option value="" disabled selected>Selecione uma disciplina</option>
+                            <option th:each="d : ${disciplinas}"
+                                    th:value="${d.id}"
+                                    th:text="${d.nome}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Professor -->
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label">Professor</label>
+                        <select class="form-select" name="idProfessor" required>
+                            <option value="" disabled selected>Selecione um professor</option>
+                            <option th:each="p : ${professores}"
+                                    th:value="${p.id}"
+                                    th:text="${p.nome}">
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Semestre -->
+                    <div class="mb-3 col-md-4">
+                        <label class="form-label">Semestre</label>
+                        <input type="text" th:field="*{semestre}" class="form-control" placeholder="2025.1">
+                    </div>
+
+                    <!-- Dia da semana -->
+                    <div class="mb-3 col-md-4">
+                        <label class="form-label">Dia da semana</label>
+                        <select th:field="*{diaSemana}" class="form-select">
+                            <option value="">Selecione</option>
+                            <option value="SEGUNDA">SEGUNDA</option>
+                            <option value="TERÇA">TERÇA</option>
+                            <option value="QUARTA">QUARTA</option>
+                            <option value="QUINTA">QUINTA</option>
+                            <option value="SEXTA">SEXTA</option>
+                            <option value="SÁBADO">SÁBADO</option>
+                        </select>
+                    </div>
+
+                    <!-- Capacidade -->
+                    <div class="mb-3 col-md-4">
+                        <label class="form-label">Capacidade</label>
+                        <input type="number" th:field="*{capacidade}" class="form-control" min="0">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Horário início -->
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label">Horário de início</label>
+                        <input type="text" th:field="*{horaInicio}" class="form-control" placeholder="18:30">
+                    </div>
+
+                    <!-- Horário fim -->
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label">Horário de término</label>
+                        <input type="text" th:field="*{horaFim}" class="form-control" placeholder="20:10">
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a th:href="@{/turmas}" class="btn btn-secondary">Voltar</a>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<footer class="mt-auto py-3 bg-dark text-light">
+    <div class="container text-center">
+        <small>SCOA © <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}"></span></small>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
