@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/alunos")
+@RequestMapping("/api/alunos")  // 👈 Mudei aqui
 public class AlunoController {
 
     private final AlunoService service;
@@ -20,7 +20,8 @@ public class AlunoController {
 
     @PostMapping
     public ResponseEntity<Aluno> criar(@RequestBody Aluno aluno) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.criarAluno(aluno));
+        Aluno salvo = service.criarAluno(aluno);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @GetMapping
@@ -29,8 +30,8 @@ public class AlunoController {
     }
 
     @GetMapping("/{id}")
-    public Aluno buscar(@PathVariable Long id) {
-        return service.buscar(id);
+    public Aluno buscarPorId(@PathVariable Long id) {
+        return service.buscarPorId(id);
     }
 
     @DeleteMapping("/{id}")
