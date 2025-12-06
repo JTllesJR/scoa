@@ -47,12 +47,17 @@
             <td th:text="${t.capacidade}"></td>
             <td>
                 <div class="btn-group btn-group-sm" role="group">
-                    <a th:href="@{'/turmas/editar/' + ${t.id}}" class="btn btn-outline-secondary">
+                    <a th:href="@{'/turmas/editar/' + ${t.id}}"
+                       class="btn btn-outline-secondary">
                         Editar
                     </a>
                     <a th:href="@{'/matriculas/turma/' + ${t.id} + '/lancamentos'}"
                        class="btn btn-outline-primary">
                         Notas/Freq.
+                    </a>
+                    <a th:href="@{'/boletim/turma/' + ${t.id}}"
+                       class="btn btn-outline-success">
+                        Boletim
                     </a>
                 </div>
             </td>
