@@ -7,14 +7,17 @@ import java.util.List;
 
 public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
 
+    // Regra de matrícula (já usada)
     boolean existsByAlunoIdAndTurmaId(Long alunoId, Long turmaId);
 
     int countByTurmaId(Long turmaId);
 
+    // Choque de horário no semestre
     List<Matricula> findByAlunoIdAndSemestre(Long alunoId, String semestre);
 
+    // Lançamento de notas por turma
     List<Matricula> findByTurmaId(Long turmaId);
 
-    // NOVO: todas as matrículas do aluno, ordenadas por semestre
+    // Histórico do aluno (para boletim e pré-requisitos)
     List<Matricula> findByAlunoIdOrderBySemestreAsc(Long alunoId);
 }

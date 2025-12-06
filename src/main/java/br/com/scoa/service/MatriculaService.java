@@ -1,6 +1,7 @@
 package br.com.scoa.service;
 
 import br.com.scoa.model.Aluno;
+import br.com.scoa.model.Disciplina;
 import br.com.scoa.model.Matricula;
 import br.com.scoa.model.Turma;
 import br.com.scoa.repository.AlunoRepository;
@@ -9,7 +10,10 @@ import br.com.scoa.repository.TurmaRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class MatriculaService {
@@ -27,7 +31,14 @@ public class MatriculaService {
     }
 
     /**
-     * MATRÍCULA PRINCIPAL (com semestre explícito)
+     * MATRÍCULA PRINCIPAL (UC02 – Realizar matrícula/rematrícula)
+     * Regras:
+     * - Verifica existência de aluno e turma;
+     * - Impede matrícula duplicada na mesma turma;
+     * - Verifica capacidade da turma;
+     * - Verifica pré-requisitos da disciplina (RN01);
+     * - Verifica choque de horário;
+     * - Cria e salva a matrícula.
      */
     public Matricula matricular(Long alunoId, Long turmaId, String semestreInformado) {
 
@@ -57,10 +68,13 @@ public class MatriculaService {
             }
         }
 
-        // 4) Choque de horário
+        // 4) Verificar pré-requisitos (RN01)
+        verificarPreRequisitos(alunoId, turma);
+
+        // 5) Choque de horário
         verificarChoqueHorario(alunoId, turma, semestre);
 
-        // 5) Criar matrícula
+        // 6) Criar matrícula
         Matricula matricula = new Matricula();
         matricula.setAluno(aluno);
         matricula.setTurma(turma);
@@ -84,12 +98,17 @@ public class MatriculaService {
         return repo.findAll();
     }
 
-    // NOVO: listar matrículas de uma turma (para lançar notas/frequência)
+    // Lista matrículas de uma turma (para lançamento de notas)
     public List<Matricula> listarPorTurma(Long turmaId) {
         return repo.findByTurmaId(turmaId);
     }
 
-    // NOVO: atualizar nota e faltas de uma matrícula
+    // Histórico do aluno (para boletim e RN01)
+    public List<Matricula> listarPorAluno(Long alunoId) {
+        return repo.findByAlunoIdOrderBySemestreAsc(alunoId);
+    }
+
+    // Atualizar nota e faltas (lançamento de notas/frequência)
     public void atualizarNotaEFaltas(Long matriculaId, Double nota, Integer faltas) {
         Matricula m = repo.findById(matriculaId)
                 .orElseThrow(() -> new RuntimeException("Matrícula não encontrada."));
@@ -100,14 +119,57 @@ public class MatriculaService {
         repo.save(m);
     }
 
-    // listar matrículas de um aluno (para boletim)
-    public List<Matricula> listarPorAluno(Long alunoId) {
-        return repo.findByAlunoIdOrderBySemestreAsc(alunoId);
-    }
+    // ================== RN01 – Verificar pré-requisitos ==================
 
     /**
-     * Verifica choque de horário com outras turmas do mesmo semestre
+     * Verifica se o aluno já foi aprovado em todas as disciplinas
+     * que são pré-requisito da disciplina desta turma.
+     *
+     * Regra de aprovação usada aqui: nota >= 6.0 (ajustável).
      */
+    private void verificarPreRequisitos(Long alunoId, Turma novaTurma) {
+
+        Disciplina disciplina = novaTurma.getDisciplina();
+        if (disciplina == null) {
+            return;
+        }
+
+        Set<Disciplina> preRequisitos = disciplina.getPreRequisitos();
+        if (preRequisitos == null || preRequisitos.isEmpty()) {
+            // disciplina sem pré-requisitos
+            return;
+        }
+
+        // Histórico do aluno
+        List<Matricula> historico = repo.findByAlunoIdOrderBySemestreAsc(alunoId);
+
+        // Disciplinas em que o aluno foi aprovado (nota >= 6)
+        Set<Long> disciplinasAprovadas = historico.stream()
+                .filter(m -> m.getNota() != null
+                        && m.getNota() >= 6.0
+                        && m.getTurma() != null
+                        && m.getTurma().getDisciplina() != null)
+                .map(m -> m.getTurma().getDisciplina().getId())
+                .collect(Collectors.toSet());
+
+        // Verificar quais pré-requisitos ainda não foram cumpridos
+        List<String> faltando = new ArrayList<>();
+        for (Disciplina pre : preRequisitos) {
+            if (pre.getId() == null) continue;
+            if (!disciplinasAprovadas.contains(pre.getId())) {
+                faltando.add(pre.getNome());
+            }
+        }
+
+        if (!faltando.isEmpty()) {
+            String msg = "Aluno não atende aos pré-requisitos desta disciplina. "
+                    + "Pré-requisitos pendentes: " + String.join(", ", faltando) + ".";
+            throw new RuntimeException(msg);
+        }
+    }
+
+    // ================== Choque de horário (já implementado antes) ==================
+
     private void verificarChoqueHorario(Long alunoId, Turma novaTurma, String semestre) {
 
         if (novaTurma.getDiaSemana() == null ||
