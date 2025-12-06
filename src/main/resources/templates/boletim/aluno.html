@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Matrículas - SCOA</title>
+    <title>Boletim do Aluno - SCOA</title>
 
     <link
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
@@ -18,37 +18,63 @@
 </nav>
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Matrículas</h2>
-        <a th:href="@{/matriculas/novo}" class="btn btn-primary">Nova Matrícula</a>
+
+    <h2>Boletim do Aluno</h2>
+
+    <div class="card shadow-sm my-3">
+        <div class="card-body">
+            <h4 class="card-title" th:text="${aluno.nome}">Nome do Aluno</h4>
+
+            <p class="card-text mb-1">
+                CPF:
+                <span th:text="${aluno.cpf}">000.000.000-00</span>
+            </p>
+
+            <p class="card-text mb-1">
+                E-mail:
+                <span th:text="${aluno.email}">email@exemplo.com</span>
+            </p>
+        </div>
     </div>
+
+    <h5 class="mt-4">Disciplinas / Turmas</h5>
 
     <table class="table table-striped table-hover shadow-sm">
         <thead class="table-dark">
         <tr>
-            <th>ID</th>
-            <th>Aluno</th>
+            <th>Semestre</th>
             <th>Turma</th>
             <th>Disciplina</th>
             <th>Professor</th>
-            <th>Semestre</th>
             <th>Nota</th>
             <th>Faltas</th>
+            <th>Situação</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="m : ${matriculas}">
-            <td th:text="${m.id}"></td>
-            <td th:text="${m.aluno != null ? m.aluno.nome : '---'}"></td>
+            <td th:text="${m.semestre}"></td>
             <td th:text="${m.turma != null ? m.turma.id : '---'}"></td>
             <td th:text="${m.turma != null && m.turma.disciplina != null ? m.turma.disciplina.nome : '---'}"></td>
             <td th:text="${m.turma != null && m.turma.professor != null ? m.turma.professor.nome : '---'}"></td>
-            <td th:text="${m.semestre}"></td>
             <td th:text="${m.nota != null ? m.nota : '-'}"></td>
             <td th:text="${m.faltas != null ? m.faltas : '-'}"></td>
+            <td>
+                <span th:if="${m.nota == null}"
+                      class="badge bg-secondary">Em andamento</span>
+
+                <span th:if="${m.nota != null and m.nota >= 6}"
+                      class="badge bg-success">Aprovado</span>
+
+                <span th:if="${m.nota != null and m.nota < 6}"
+                      class="badge bg-danger">Reprovado</span>
+            </td>
         </tr>
         </tbody>
     </table>
+
+    <a th:href="@{/alunos}" class="btn btn-secondary mt-3">Voltar</a>
+
 </div>
 
 <footer class="mt-auto py-3 bg-dark text-light">
