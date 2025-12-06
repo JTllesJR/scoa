@@ -1,58 +1,84 @@
 package br.com.scoa.service;
 
 import br.com.scoa.model.Aluno;
-import br.com.scoa.model.Turma;
 import br.com.scoa.model.Matricula;
+import br.com.scoa.model.Turma;
 import br.com.scoa.repository.AlunoRepository;
 import br.com.scoa.repository.MatriculaRepository;
 import br.com.scoa.repository.TurmaRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class MatriculaService {
 
-    private final MatriculaRepository matriculaRepository;
-    private final AlunoRepository alunoRepository;
-    private final TurmaRepository turmaRepository;
+    private final MatriculaRepository repo;
+    private final AlunoRepository alunoRepo;
+    private final TurmaRepository turmaRepo;
 
-    public MatriculaService(MatriculaRepository matriculaRepository,
-                            AlunoRepository alunoRepository,
-                            TurmaRepository turmaRepository) {
-        this.matriculaRepository = matriculaRepository;
-        this.alunoRepository = alunoRepository;
-        this.turmaRepository = turmaRepository;
+    public MatriculaService(MatriculaRepository repo,
+                            AlunoRepository alunoRepo,
+                            TurmaRepository turmaRepo) {
+        this.repo = repo;
+        this.alunoRepo = alunoRepo;
+        this.turmaRepo = turmaRepo;
     }
 
-    public Matricula matricular(Long alunoId, Long turmaId) {
+    /**
+     * Regra principal de matrícula:
+     * - Verifica se aluno e turma existem;
+     * - Impede matrícula duplicada na mesma turma;
+     * - Verifica capacidade da turma (se informada);
+     * - Cria e salva a matrícula.
+     */
+    public Matricula matricular(Long alunoId, Long turmaId, String semestre) {
 
-        Aluno aluno = alunoRepository.findById(alunoId)
-                .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
+        // 1) Buscar aluno e turma
+        Aluno aluno = alunoRepo.findById(alunoId)
+                .orElseThrow(() -> new RuntimeException("Aluno não encontrado."));
 
-        Turma turma = turmaRepository.findById(turmaId)
-                .orElseThrow(() -> new RuntimeException("Turma não encontrada"));
+        Turma turma = turmaRepo.findById(turmaId)
+                .orElseThrow(() -> new RuntimeException("Turma não encontrada."));
 
-        // RN: bloqueio por pendências
-        if (aluno.isPendenciaFinanceira() || aluno.isPendenciaBiblioteca()) {
-            throw new RuntimeException("Aluno possui pendências e não pode se matricular.");
+        // 2) Impedir matrícula duplicada (mesmo aluno, mesma turma)
+        if (repo.existsByAlunoIdAndTurmaId(alunoId, turmaId)) {
+            throw new RuntimeException("Aluno já está matriculado nesta turma.");
         }
 
-        // RN: verificar capacidade (na versão simples)
-        long qtdMatriculados = matriculaRepository.findAll().stream()
-                .filter(m -> m.getTurma().getId().equals(turmaId))
-                .count();
-
-        if (qtdMatriculados >= turma.getCapacidade()) {
-            throw new RuntimeException("Turma lotada.");
+        // 3) Verificar capacidade da turma (se tiver capacidade definida)
+        Integer capacidade = turma.getCapacidade(); // pode ser null
+        if (capacidade != null) {
+            int matriculados = repo.countByTurmaId(turma.getId());
+            if (matriculados >= capacidade) {
+                throw new RuntimeException("Turma sem vagas disponíveis.");
+            }
         }
 
+        // 4) Criar a matrícula
         Matricula matricula = new Matricula();
         matricula.setAluno(aluno);
         matricula.setTurma(turma);
-        matricula.setDataMatricula(LocalDate.now());
-        matricula.setStatus("ATIVA");
 
-        return matriculaRepository.save(matricula);
+        // se o semestre vier vazio, usa o semestre da turma
+        if (semestre != null && !semestre.isBlank()) {
+            matricula.setSemestre(semestre);
+        } else {
+            matricula.setSemestre(turma.getSemestre());
+        }
+
+        // 5) Salvar
+        return repo.save(matricula);
+    }
+
+    // Versão antiga, com 2 parâmetros, delega para a nova
+    public Matricula matricular(Long alunoId, Long turmaId) {
+        Turma turma = turmaRepo.findById(turmaId)
+                .orElseThrow(() -> new RuntimeException("Turma não encontrada."));
+        return matricular(alunoId, turmaId, turma.getSemestre());
+    }
+
+    public List<Matricula> listar() {
+        return repo.findAll();
     }
 }

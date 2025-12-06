@@ -6,7 +6,7 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/matriculas")
+@RequestMapping("/api/matriculas")
 public class MatriculaController {
 
     private final MatriculaService service;
