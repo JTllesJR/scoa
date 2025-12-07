@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Empréstimo - SCOA</title>
+
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+    >
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}">SCOA</a>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <h2 class="mb-3">Registrar Empréstimo</h2>
+
+    <div class="alert alert-danger" th:if="${erro != null}" th:text="${erro}"></div>
+
+    <div class="card shadow-sm mx-auto" style="max-width: 600px;">
+        <div class="card-body">
+
+            <h5 class="card-title">Obra</h5>
+            <p class="mb-1">
+                <strong th:text="${obra.titulo}">Título</strong>
+            </p>
+            <p class="mb-1">
+                Autor: <span th:text="${obra.autor}">Autor</span>
+            </p>
+            <p class="mb-3">
+                Código de Acervo: <span th:text="${obra.codigoAcervo}">COD</span>
+            </p>
+
+            <form th:action="@{/biblioteca/emprestar}" method="post">
+
+                <input type="hidden" name="obraId" th:value="${obra.id}"/>
+
+                <!-- Aluno -->
+                <div class="mb-3">
+                    <label class="form-label">Aluno</label>
+                    <select class="form-select" name="alunoId" required>
+                        <option disabled selected value="">Selecione um aluno</option>
+                        <option th:each="a : ${alunos}"
+                                th:value="${a.id}"
+                                th:text="${a.nome}">
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Data prevista devolução -->
+                <div class="mb-3">
+                    <label class="form-label">Data prevista para devolução</label>
+                    <input type="date" name="dataPrevistaDevolucao" class="form-control">
+                    <div class="form-text">
+                        Se não informado, o sistema usa 7 dias a partir de hoje.
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a th:href="@{/obras}" class="btn btn-secondary">Voltar</a>
+                    <button type="submit" class="btn btn-primary">Confirmar Empréstimo</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-auto py-3 bg-dark text-light">
+    <div class="container text-center">
+        <small>SCOA © <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}"></span></small>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

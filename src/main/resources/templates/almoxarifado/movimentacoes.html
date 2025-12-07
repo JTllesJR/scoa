@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Histórico de Movimentações - Almoxarifado</title>
+
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+    >
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}">SCOA</a>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Histórico de Movimentações</h2>
+        <a th:href="@{/almoxarifado}" class="btn btn-secondary">Voltar aos Itens</a>
+    </div>
+
+    <form class="row g-2 mb-3" method="get" th:action="@{/almoxarifado/movimentacoes}">
+        <div class="col-auto">
+            <select class="form-select" name="itemId">
+                <option th:value="" selected>Todos os itens</option>
+                <option th:each="i : ${itens}"
+                        th:value="${i.id}"
+                        th:selected="${filtroItem != null and filtroItem.id == i.id}"
+                        th:text="${i.nome}">
+                </option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary">Filtrar</button>
+        </div>
+    </form>
+
+    <table class="table table-striped table-hover shadow-sm">
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Item</th>
+            <th>Tipo</th>
+            <th>Quantidade</th>
+            <th>Observação</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="m : ${movimentacoes}">
+            <td th:text="${m.id}"></td>
+            <td th:text="${m.dataMovimentacao}"></td>
+            <td th:text="${m.item != null ? m.item.nome : '---'}"></td>
+            <td>
+                <span th:if="${m.tipo == 'ENTRADA'}" class="badge bg-success">Entrada</span>
+                <span th:if="${m.tipo == 'SAIDA'}" class="badge bg-danger">Saída</span>
+            </td>
+            <td th:text="${m.quantidade}"></td>
+            <td th:text="${m.observacao}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+<footer class="mt-auto py-3 bg-dark text-light">
+    <div class="container text-center">
+        <small>SCOA © <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}"></span></small>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

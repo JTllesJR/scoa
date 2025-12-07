@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Movimentar Estoque - Almoxarifado</title>
+
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+    >
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}">SCOA</a>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <h2 class="mb-3">Movimentar Estoque</h2>
+
+    <div class="alert alert-danger" th:if="${erro != null}" th:text="${erro}"></div>
+
+    <div class="card shadow-sm mx-auto" style="max-width: 600px;">
+        <div class="card-body">
+
+            <h5 class="card-title" th:text="${item.nome}">Item</h5>
+            <p class="mb-1">Código: <span th:text="${item.codigo}">COD</span></p>
+            <p class="mb-3">
+                Quantidade atual:
+                <strong th:text="${item.quantidadeAtual}">0</strong>
+            </p>
+
+            <form th:action="@{/almoxarifado/movimentar}" method="post">
+
+                <input type="hidden" name="itemId" th:value="${item.id}"/>
+
+                <div class="mb-3">
+                    <label class="form-label">Tipo de movimentação</label>
+                    <select class="form-select" name="tipo" required>
+                        <option value="ENTRADA">Entrada</option>
+                        <option value="SAIDA">Saída</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Quantidade</label>
+                    <input type="number" name="quantidade" class="form-control" min="1" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Observação</label>
+                    <textarea name="observacao" class="form-control" rows="2"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a th:href="@{/almoxarifado}" class="btn btn-secondary">Voltar</a>
+                    <button type="submit" class="btn btn-primary">Confirmar</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<footer class="mt-auto py-3 bg-dark text-light">
+    <div class="container text-center">
+        <small>SCOA © <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}"></span></small>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
